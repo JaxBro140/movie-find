@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Host Server</title>
+<style>
+  body { font-family: Arial; background:#111; color:#eee; text-align:center; }
+  .screen { display:none; padding:20px; }
+  .box { background:#222; padding:20px; border-radius:10px; width:350px; margin:auto; }
+  input, button, textarea {
+    width:100%; padding:10px; margin:8px 0; border-radius:6px; border:none;
+  }
+  button { background:#2563eb; color:white; cursor:pointer; }
+  button:hover { background:#1d4ed8; }
+</style>
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="mainMenu" class="screen" style="display:block;">
+  <div class="box">
+    <h2>Main Menu</h2>
+    <button onclick="hostServer()">Host Server</button>
+    <input id="joinCodeInput" placeholder="Enter server code">
+    <button onclick="openJoinTab()">Join Server</button>
+  </div>
+</div>
+
+<!-- HOST CODE POPUP -->
+<div id="hostCodeScreen" class="screen">
+  <div class="box">
+    <h2>Your Server Code</h2>
+    <h1 id="hostCodeDisplay"></h1>
+    <button onclick="hostContinue()">OK</button>
+  </div>
+</div>
+
+<!-- HOST ENTER PROBLEMS -->
+<div id="hostProblemScreen" class="screen">
+  <div class="box">
+    <h2>Enter Math Problems</h2>
+    <textarea id="problemInput" rows="8" placeholder="One problem per line"></textarea>
+    <button onclick="hostSubmitProblems()">OK</button>
+  </div>
+</div>
+
+<!-- HOST LEADERBOARD -->
+<div id="hostLeaderboard" class="screen">
+  <div class="box">
+    <h2>Leaderboard</h2>
+    <div id="leaderboardList"></div>
+  </div>
+</div>
+
+<script>
+// ---------------------------
+// HOST CREATES SERVER
+// ---------------------------
+function hostServer() {
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  localStorage.setItem("server", JSON.stringify({
+    code,
+    problems: [],
+    players: {},
+    started: false
+  }));
+
+  document.getElementById("hostCodeDisplay").textContent = code;
+  show("hostCodeScreen");
+}
+
+function hostContinue() {
+  show("hostProblemScreen");
+}
+
+function hostSubmitProblems() {
+  const text = document.getElementById("problemInput").value.trim();
+  if (!text) return;
+
+  const server = JSON.parse(localStorage.getItem("server"));
+  server.problems = text.split("\n").map(p => p.trim());
+  server.started = true;
+
+  localStorage.setItem("server", JSON.stringify(server));
+
+  show("hostLeaderboard");
+  updateLeaderboard();
+}
+
+// ---------------------------
+// JOIN BUTTON (opens new tab)
+// ---------------------------
+function openJoinTab() {
+  const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
+  if (!code) return alert("Enter a code");
+
+  window.open("join.html?code=" + code, "_blank");
+}
+
+// ---------------------------
+// SCREEN SWITCHER
+// ---------------------------
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
+  document.getElementById(id).style.display = "block";
+}
+
+// ---------------------------
+// HOST LEADERBOARD
+// ---------------------------
+window.addEventListener("storage", updateLeaderboard);
+
+function updateLeaderboard() {
+  const server = JSON.parse(localStorage.getItem("server"));
+  if (!server) return;
+
+  const list = document.getElementById("leaderboardList");
+  if (!list) return;
+
+  list.innerHTML = "";
+  Object.entries(server.players).forEach(([id, data]) => {
+    const div = document.createElement("div");
+    div.textContent = `${id}: ${data.score} pts`;
+    list.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>
