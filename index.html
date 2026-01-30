@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Movie & Show Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      margin-top: 40px;
+      background: #020617;
+      padding: 24px 28px;
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      width: 620px;
+      max-width: 95vw;
+      position: relative;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.9rem;
+      color: #f97316;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .search-group {
+      display: flex;
+      gap: 8px;
+      position: relative;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"]:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 1px #f97316;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #f97316;
+      color: #020617;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      background: #fb923c;
+      transform: translateY(-1px);
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 48px;
+      left: 0;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 10;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #334155;
+      font-size: 0.9rem;
+    }
+
+    .suggestion-item:hover {
+      background: #334155;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+
+    .filters-row select {
+      flex: 1 1 calc(33% - 8px);
+      padding: 8px;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e5e7eb;
+      border: 1px solid #334155;
+      font-size: 0.85rem;
+    }
+
+    .sort-select {
+      flex: 1 1 100%;
+    }
+
+    .popular-title {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #f97316;
+      font-size: 1.3rem;
+    }
+
+    .section-title {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #e5e7eb;
+      font-size: 1.1rem;
+    }
+
+    .results {
+      margin-top: 4px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .media-card {
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #020617;
+      display: flex;
+      gap: 10px;
+      font-size: 0.9rem;
+      align-items: flex-start;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .media-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .poster {
+      width: 70px;
+      height: 100px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4f46e5, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #e5e7eb;
+      flex-shrink: 0;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .media-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .media-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .media-title {
+      font-weight: 600;
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+
+    .media-type {
+      font-size: 0.8rem;
+      color: #fbbf24;
+    }
+
+    .media-year {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .media-service {
+      font-size: 0.85rem;
+      color: #a5b4fc;
+    }
+
+    .media-category,
+    .media-rating,
+    .media-cert,
+    .media-global {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .rating-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .star-rating {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: #facc15;
+      animation: stars-pop 0.25s ease-out;
+    }
+
+    @keyframes stars-pop {
+      0% { transform: scale(0.9); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .like-btn {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: #f97316;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #020617;
+      font-weight: bold;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .like-btn span.heart {
+      display: inline-block;
+      transition: transform 0.12s ease;
+    }
+
+    .like-btn.liked {
+      background: #ef4444;
+      color: #fee2e2;
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.5);
+    }
+
+    .like-btn:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+    }
+
+    .like-btn.liked span.heart {
+      transform: scale(1.2);
+    }
+
+    .no-results {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    .subtext {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Movie & Show Finder</h1>
+    <p>Ratings reflect global popularity and your likes. Search, filter, sort, and see what’s trending.</p>
+
+    <div class="top-bar">
+      <div class="search-group">
+        <input type="text" id="mediaInput" placeholder="Search (e.g. action, PG-13, Netflix, Dune)" />
+        <button id="searchBtn">Search</button>
+        <div id="suggestions" class="suggestions"></div>
+      </div>
+
+      <div class="filters-row">
+        <select id="filterCategory">
+          <option value="">All Categories</option>
+          <option>Action</option>
+          <option>Drama</option>
+          <option>Sci-Fi</option>
+          <option>Comedy</option>
+          <option>Fantasy</option>
+          <option>Animation</option>
+          <option>Horror</option>
+          <option>Thriller</option>
+          <option>Crime</option>
+          <option>Romance</option>
+        </select>
+
+        <select id="filterRating">
+          <option value="">All Ratings</option>
+          <option>G</option>
+          <option>PG</option>
+          <option>PG-13</option>
+          <option>R</option>
+          <option>TV-Y</option>
+          <option>TV-PG</option>
+          <option>TV-14</option>
+          <option>TV-MA</option>
+        </select>
+
+        <select id="filterService">
+          <option value="">All Services</option>
+          <option>Netflix</option>
+          <option>Disney+</option>
+          <option>Max</option>
+          <option>Prime Video</option>
+          <option>Hulu</option>
+          <option>Peacock</option>
+          <option>Paramount+</option>
+          <option>Starz</option>
+        </select>
+
+        <select id="filterType">
+          <option value="">All Types</option>
+          <option>Movie</option>
+          <option>Show</option>
+        </select>
+
+        <select id="sortSelect" class="sort-select">
+          <option value="">Sort: Default</option>
+          <option value="rating">Sort by Rating (High → Low)</option>
+          <option value="year">Sort by Year (New → Old)</option>
+          <option value="title">Sort by Title (A → Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 class="popular-title">Popular Now</h2>
+    <div class="subtext">Hand-picked highlights from the catalog.</div>
+    <div id="popularNow" class="results"></div>
+
+    <h2 class="section-title">Trending (Global + Your Likes)</h2>
+    <div class="subtext">Titles with high worldwide love and your personal likes.</div>
+    <div id="trendingList" class="results"></div>
+
+    <h2 class="section-title">Liked Movies & Shows</h2>
+    <div class="subtext">Everything you’ve liked, saved to this device.</div>
+    <div id="likedList" class="results"></div>
+
+    <h2 class="section-title">Search Results</h2>
+    <div id="results" class="results"></div>
+  </div>
+
+  <script>
+    // globalLikes are rough, IMDb-style popularity numbers (simulated)
+    // streamingService supports string or array of strings
+    const media = [
+      // Core movies
+      { title: "Dune: Part Two", year: 2024, streamingService: ["Max"], type: "Movie", category: "Sci-Fi", rating: "PG-13", baseRating: 8.8, globalLikes: 850000 },
+      { title: "Dune", year: 2021, streamingService: ["Max"], type: "Movie", category: "Sci-Fi", rating: "PG-13", baseRating: 8.0, globalLikes: 780000 },
+      { title: "Oppenheimer", year: 2023, streamingService: ["Peacock"], type: "Movie", category: "Drama", rating: "R", baseRating: 8.6, globalLikes: 1200000 },
+      { title: "Barbie", year: 2023, streamingService: ["Max"], type: "Movie", category: "Comedy", rating: "PG-13", baseRating: 7.1, globalLikes: 950000 },
+      { title: "Spider-Man: No Way Home", year: 2021, streamingService: ["Starz"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 8.3, globalLikes: 1600000 },
+      { title: "Avatar: The Way of Water", year: 2022, streamingService: ["Disney+"], type: "Movie", category: "Fantasy", rating: "PG-13", baseRating: 7.7, globalLikes: 1400000 },
+      { title: "The Dark Knight", year: 2008, streamingService: ["Max"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 9.0, globalLikes: 2500000 },
+      { title: "Interstellar", year: 2014, streamingService: ["Paramount+", "Max"], type: "Movie", category: "Sci-Fi", rating: "PG-13", baseRating: 8.7, globalLikes: 1900000 },
+      { title: "Inception", year: 2010, streamingService: ["Netflix"], type: "Movie", category: "Sci-Fi", rating: "PG-13", baseRating: 8.8, globalLikes: 2100000 },
+      { title: "The Matrix", year: 1999, streamingService: ["Max"], type: "Movie", category: "Sci-Fi", rating: "R", baseRating: 8.7, globalLikes: 1700000 },
+      { title: "The Lion King", year: 1994, streamingService: ["Disney+"], type: "Movie", category: "Animation", rating: "G", baseRating: 8.5, globalLikes: 1300000 },
+      { title: "Frozen", year: 2013, streamingService: ["Disney+"], type: "Movie", category: "Animation", rating: "PG", baseRating: 7.4, globalLikes: 1100000 },
+      { title: "Joker", year: 2019, streamingService: ["Max"], type: "Movie", category: "Drama", rating: "R", baseRating: 8.4, globalLikes: 1500000 },
+      { title: "Avengers: Endgame", year: 2019, streamingService: ["Disney+"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 8.4, globalLikes: 3000000 },
+      { title: "Avengers: Infinity War", year: 2018, streamingService: ["Disney+"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 8.4, globalLikes: 2600000 },
+      { title: "Deadpool", year: 2016, streamingService: ["Disney+"], type: "Movie", category: "Action", rating: "R", baseRating: 8.0, globalLikes: 1300000 },
+      { title: "The Batman", year: 2022, streamingService: ["Max"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 7.9, globalLikes: 900000 },
+      { title: "John Wick", year: 2014, streamingService: ["Peacock"], type: "Movie", category: "Action", rating: "R", baseRating: 7.4, globalLikes: 950000 },
+      { title: "Top Gun: Maverick", year: 2022, streamingService: ["Paramount+"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 8.3, globalLikes: 1400000 },
+
+      // Core shows
+      { title: "Breaking Bad", year: 2008, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 9.5, globalLikes: 2300000 },
+      { title: "Stranger Things", year: 2016, streamingService: ["Netflix"], type: "Show", category: "Sci-Fi", rating: "TV-14", baseRating: 8.7, globalLikes: 2100000 },
+      { title: "The Boys", year: 2019, streamingService: ["Prime Video"], type: "Show", category: "Action", rating: "TV-MA", baseRating: 8.7, globalLikes: 1200000 },
+      { title: "Game of Thrones", year: 2011, streamingService: ["Max"], type: "Show", category: "Fantasy", rating: "TV-MA", baseRating: 9.2, globalLikes: 3200000 },
+      { title: "The Last of Us", year: 2023, streamingService: ["Max"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.8, globalLikes: 1100000 },
+      { title: "The Office", year: 2005, streamingService: ["Peacock"], type: "Show", category: "Comedy", rating: "TV-14", baseRating: 8.9, globalLikes: 2000000 },
+      { title: "Friends", year: 1994, streamingService: ["Max"], type: "Show", category: "Comedy", rating: "TV-14", baseRating: 8.9, globalLikes: 2500000 },
+      { title: "The Mandalorian", year: 2019, streamingService: ["Disney+"], type: "Show", category: "Sci-Fi", rating: "TV-14", baseRating: 8.7, globalLikes: 1300000 },
+      { title: "Loki", year: 2021, streamingService: ["Disney+"], type: "Show", category: "Fantasy", rating: "TV-14", baseRating: 8.2, globalLikes: 900000 },
+      { title: "Wednesday", year: 2022, streamingService: ["Netflix"], type: "Show", category: "Horror", rating: "TV-14", baseRating: 8.1, globalLikes: 1000000 },
+      { title: "Squid Game", year: 2021, streamingService: ["Netflix"], type: "Show", category: "Thriller", rating: "TV-MA", baseRating: 8.0, globalLikes: 1800000 },
+      { title: "The Walking Dead", year: 2010, streamingService: ["Netflix"], type: "Show", category: "Horror", rating: "TV-MA", baseRating: 8.2, globalLikes: 1400000 },
+      { title: "Better Call Saul", year: 2015, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.9, globalLikes: 1200000 },
+      { title: "Rick and Morty", year: 2013, streamingService: ["Hulu"], type: "Show", category: "Animation", rating: "TV-MA", baseRating: 9.1, globalLikes: 1500000 },
+      { title: "Peaky Blinders", year: 2013, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.8, globalLikes: 1100000 },
+
+      // Extra movies
+      { title: "Inside Out", year: 2015, streamingService: ["Disney+"], type: "Movie", category: "Animation", rating: "PG", baseRating: 8.1, globalLikes: 900000 },
+      { title: "Shrek", year: 2001, streamingService: ["Peacock"], type: "Movie", category: "Animation", rating: "PG", baseRating: 7.9, globalLikes: 1300000 },
+      { title: "The Shawshank Redemption", year: 1994, streamingService: ["Netflix"], type: "Movie", category: "Drama", rating: "R", baseRating: 9.3, globalLikes: 2800000 },
+      { title: "Pulp Fiction", year: 1994, streamingService: ["Max"], type: "Movie", category: "Crime", rating: "R", baseRating: 8.9, globalLikes: 2200000 },
+      { title: "Forrest Gump", year: 1994, streamingService: ["Netflix"], type: "Movie", category: "Drama", rating: "PG-13", baseRating: 8.8, globalLikes: 2100000 },
+      { title: "The Social Network", year: 2010, streamingService: ["Netflix"], type: "Movie", category: "Drama", rating: "PG-13", baseRating: 7.8, globalLikes: 800000 },
+      { title: "The Wolf of Wall Street", year: 2013, streamingService: ["Paramount+"], type: "Movie", category: "Drama", rating: "R", baseRating: 8.2, globalLikes: 1400000 },
+      { title: "Mad Max: Fury Road", year: 2015, streamingService: ["Max"], type: "Movie", category: "Action", rating: "R", baseRating: 8.1, globalLikes: 900000 },
+      { title: "Guardians of the Galaxy", year: 2014, streamingService: ["Disney+"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 8.0, globalLikes: 1500000 },
+      { title: "Black Panther", year: 2018, streamingService: ["Disney+"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 7.3, globalLikes: 1600000 },
+      { title: "The Hunger Games", year: 2012, streamingService: ["Peacock"], type: "Movie", category: "Action", rating: "PG-13", baseRating: 7.2, globalLikes: 1200000 },
+      { title: "La La Land", year: 2016, streamingService: ["Netflix"], type: "Movie", category: "Romance", rating: "PG-13", baseRating: 8.0, globalLikes: 900000 },
+      { title: "Whiplash", year: 2014, streamingService: ["Netflix"], type: "Movie", category: "Drama", rating: "R", baseRating: 8.5, globalLikes: 700000 },
+      { title: "The Revenant", year: 2015, streamingService: ["Hulu"], type: "Movie", category: "Drama", rating: "R", baseRating: 8.0, globalLikes: 800000 },
+      { title: "The Martian", year: 2015, streamingService: ["Max"], type: "Movie", category: "Sci-Fi", rating: "PG-13", baseRating: 8.0, globalLikes: 900000 },
+      { title: "Coco", year: 2017, streamingService: ["Disney+"], type: "Movie", category: "Animation", rating: "PG", baseRating: 8.4, globalLikes: 1000000 },
+      { title: "Moana", year: 2016, streamingService: ["Disney+"], type: "Movie", category: "Animation", rating: "PG", baseRating: 7.6, globalLikes: 950000 },
+      { title: "The Conjuring", year: 2013, streamingService: ["Max"], type: "Movie", category: "Horror", rating: "R", baseRating: 7.5, globalLikes: 700000 },
+      { title: "Hereditary", year: 2018, streamingService: ["Max"], type: "Movie", category: "Horror", rating: "R", baseRating: 7.3, globalLikes: 500000 },
+      { title: "Get Out", year: 2017, streamingService: ["Peacock"], type: "Movie", category: "Horror", rating: "R", baseRating: 7.7, globalLikes: 900000 },
+
+      // Extra shows
+      { title: "The Witcher", year: 2019, streamingService: ["Netflix"], type: "Show", category: "Fantasy", rating: "TV-MA", baseRating: 8.1, globalLikes: 900000 },
+      { title: "House of the Dragon", year: 2022, streamingService: ["Max"], type: "Show", category: "Fantasy", rating: "TV-MA", baseRating: 8.5, globalLikes: 1100000 },
+      { title: "The Crown", year: 2016, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.6, globalLikes: 800000 },
+      { title: "The Umbrella Academy", year: 2019, streamingService: ["Netflix"], type: "Show", category: "Sci-Fi", rating: "TV-14", baseRating: 7.9, globalLikes: 700000 },
+      { title: "The Queen's Gambit", year: 2020, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.6, globalLikes: 750000 },
+      { title: "Narcos", year: 2015, streamingService: ["Netflix"], type: "Show", category: "Crime", rating: "TV-MA", baseRating: 8.8, globalLikes: 900000 },
+      { title: "Mindhunter", year: 2017, streamingService: ["Netflix"], type: "Show", category: "Crime", rating: "TV-MA", baseRating: 8.6, globalLikes: 600000 },
+      { title: "The Handmaid's Tale", year: 2017, streamingService: ["Hulu"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.2, globalLikes: 700000 },
+      { title: "Westworld", year: 2016, streamingService: ["Max"], type: "Show", category: "Sci-Fi", rating: "TV-MA", baseRating: 8.5, globalLikes: 800000 },
+      { title: "Lost", year: 2004, streamingService: ["Hulu"], type: "Show", category: "Drama", rating: "TV-14", baseRating: 8.3, globalLikes: 1000000 },
+      { title: "Suits", year: 2011, streamingService: ["Netflix"], type: "Show", category: "Drama", rating: "TV-14", baseRating: 8.4, globalLikes: 950000 },
+      { title: "Brooklyn Nine-Nine", year: 2013, streamingService: ["Peacock"], type: "Show", category: "Comedy", rating: "TV-14", baseRating: 8.4, globalLikes: 900000 },
+      { title: "How I Met Your Mother", year: 2005, streamingService: ["Hulu"], type: "Show", category: "Comedy", rating: "TV-14", baseRating: 8.3, globalLikes: 1100000 },
+      { title: "The Simpsons", year: 1989, streamingService: ["Disney+"], type: "Show", category: "Animation", rating: "TV-14", baseRating: 8.7, globalLikes: 1500000 },
+      { title: "Family Guy", year: 1999, streamingService: ["Hulu"], type: "Show", category: "Animation", rating: "TV-14", baseRating: 8.2, globalLikes: 1000000 },
+      { title: "Bluey", year: 2018, streamingService: ["Disney+"], type: "Show", category: "Animation", rating: "TV-Y", baseRating: 9.5, globalLikes: 800000 },
+      { title: "The Bear", year: 2022, streamingService: ["Hulu"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.6, globalLikes: 600000 },
+      { title: "Yellowstone", year: 2018, streamingService: ["Peacock"], type: "Show", category: "Drama", rating: "TV-MA", baseRating: 8.7, globalLikes: 700000 },
+      { title: "The Good Place", year: 2016, streamingService: ["Netflix"], type: "Show", category: "Comedy", rating: "TV-14", baseRating: 8.2, globalLikes: 650000 },
+      { title: "Dexter", year: 2006, streamingService: ["Paramount+"], type: "Show", category: "Crime", rating: "TV-MA", baseRating: 8.6, globalLikes: 900000 }
+    ];
+
+    // Likes stored locally (your personal likes)
+    let liked = JSON.parse(localStorage.getItem("likedMedia")) || [];
+
+    const input = document.getElementById("mediaInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const resultsDiv = document.getElementById("results");
+    const suggestionsDiv = document.getElementById("suggestions");
+    const sortSelect = document.getElementById("sortSelect");
+
+    // Strong global influence, normalized so ratings stay meaningful and capped at 10
+    function calculateRating(item) {
+      const isLiked = liked.includes(item.title) ? 1 : 0;
+      const globalFactor = (item.globalLikes || 0) / 1000000; // millions
+      const final =
+        item.baseRating +
+        globalFactor * 0.6 +   // strong global influence
+        isLiked * 0.2;         // your personal boost
+      return Math.min(10, final);
+    }
+
+    function getStarRating(finalRating) {
+      const filled = Math.round(finalRating);
+      const empty = 10 - filled;
+      return "⭐".repeat(filled) + "☆".repeat(empty);
+    }
+
+    function getPosterInitials(title) {
+      const words = title.split(" ").filter(Boolean);
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+
+    function normalizeServices(services) {
+      if (Array.isArray(services)) return services;
+      if (typeof services === "string" && services.trim() !== "") return [services];
+      return [];
+    }
+
+    function toggleLike(title) {
+      if (liked.includes(title)) {
+        liked = liked.filter(t => t !== title);
+      } else {
+        liked.push(title);
+      }
+      localStorage.setItem("likedMedia", JSON.stringify(liked));
+      renderLiked();
+      renderTrending();
+      searchMedia();
+      loadPopularNow();
+    }
+
+    function createCard(item) {
+      const card = document.createElement("div");
+      card.className = "media-card";
+
+      const poster = document.createElement("div");
+      poster.className = "poster";
+      poster.textContent = getPosterInitials(item.title);
+
+      const content = document.createElement("div");
+      content.className = "media-content";
+
+      const headerRow = document.createElement("div");
+      headerRow.className = "media-header-row";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "media-title";
+      titleEl.textContent = item.title;
+
+      const typeEl = document.createElement("div");
+      typeEl.className = "media-type";
+      typeEl.textContent = item.type;
+
+      headerRow.appendChild(titleEl);
+      headerRow.appendChild(typeEl);
+
+      const yearEl = document.createElement("div");
+      yearEl.className = "media-year";
+      yearEl.textContent = `Year: ${item.year}`;
+
+      const serviceEl = document.createElement("div");
+      serviceEl.className = "media-service";
+      const services = normalizeServices(item.streamingService);
+      serviceEl.textContent = `Streaming on: ${services.join(", ") || "N/A"}`;
+
+      const categoryEl = document.createElement("div");
+      categoryEl.className = "media-category";
+      categoryEl.textContent = `Category: ${item.category}`;
+
+      const certEl = document.createElement("div");
+      certEl.className = "media-cert";
+      certEl.textContent = `Content rating: ${item.rating}`;
+
+      const globalEl = document.createElement("div");
+      globalEl.className = "media-global";
+      globalEl.textContent = `Global likes: ${item.globalLikes.toLocaleString()}`;
+
+      const ratingRow = document.createElement("div");
+      ratingRow.className = "rating-row";
+      const finalRating = calculateRating(item);
+      const stars = document.createElement("div");
+      stars.className = "star-rating";
+      stars.textContent = getStarRating(finalRating);
+      const numeric = document.createElement("div");
+      numeric.className = "media-rating";
+      numeric.textContent = `Score: ${finalRating.toFixed(1)}/10`;
+      ratingRow.appendChild(stars);
+      ratingRow.appendChild(numeric);
+
+      const btn = document.createElement("button");
+      const isLiked = liked.includes(item.title);
+      btn.className = "like-btn" + (isLiked ? " liked" : "");
+      btn.innerHTML = `<span class="heart">${isLiked ? "💔" : "❤️"}</span><span>${isLiked ? "Unlike" : "Like"}</span>`;
+      btn.addEventListener("click", () => toggleLike(item.title));
+
+      content.appendChild(headerRow);
+      content.appendChild(yearEl);
+      content.appendChild(serviceEl);
+      content.appendChild(categoryEl);
+      content.appendChild(certEl);
+      content.appendChild(globalEl);
+      content.appendChild(ratingRow);
+      content.appendChild(btn);
+
+      card.appendChild(poster);
+      card.appendChild(content);
+      return card;
+    }
+
+    function sortItems(items) {
+      const mode = sortSelect.value;
+      if (!mode) return items.slice();
+      const copy = items.slice();
+      if (mode === "rating") {
+        copy.sort((a, b) => calculateRating(b) - calculateRating(a));
+      } else if (mode === "year") {
+        copy.sort((a, b) => b.year - a.year);
+      } else if (mode === "title") {
+        copy.sort((a, b) => a.title.localeCompare(b.title));
+      }
+      return copy;
+    }
+
+    function renderList(containerId, items) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+      if (!items.length) {
+        container.innerHTML = `<div class="no-results">No items to show.</div>`;
+        return;
+      }
+      const sorted = sortItems(items);
+      sorted.forEach(item => container.appendChild(createCard(item)));
+    }
+
+    function loadPopularNow() {
+      const popular = media.slice(0, 8);
+      renderList("popularNow", popular);
+    }
+
+    function renderLiked() {
+      const likedItems = media.filter(item => liked.includes(item.title));
+      const container = document.getElementById("likedList");
+      container.innerHTML = "";
+      if (!likedItems.length) {
+        container.innerHTML = `<div class="no-results">No liked movies or shows yet.</div>`;
+        return;
+      }
+      const sorted = sortItems(likedItems);
+      sorted.forEach(item => container.appendChild(createCard(item)));
+    }
+
+    function renderTrending() {
+      const likedItems = media.filter(item => liked.includes(item.title));
+      const container = document.getElementById("trendingList");
+      container.innerHTML = "";
+      if (!likedItems.length) {
+        container.innerHTML = `<div class="no-results">Like some things to see them trend here.</div>`;
+        return;
+      }
+      const sorted = likedItems
+        .slice()
+        .sort((a, b) => calculateRating(b) - calculateRating(a))
+        .slice(0, 10);
+      sorted.forEach(item => container.appendChild(createCard(item)));
+    }
+
+    function renderResults(matches) {
+      const container = resultsDiv;
+      container.innerHTML = "";
+      if (!matches.length) {
+        container.innerHTML = `<div class="no-results">No results found.</div>`;
+        return;
+      }
+      const sorted = sortItems(matches);
+      sorted.forEach(item => container.appendChild(createCard(item)));
+    }
+
+    function searchMedia() {
+      const query = input.value.trim().toLowerCase();
+      const category = document.getElementById("filterCategory").value.toLowerCase();
+      const rating = document.getElementById("filterRating").value.toLowerCase();
+      const service = document.getElementById("filterService").value.toLowerCase();
+      const type = document.getElementById("filterType").value.toLowerCase();
+
+      const matches = media.filter(item => {
+        const services = normalizeServices(item.streamingService);
+
+        const matchesQuery =
+          !query ||
+          item.title.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.rating.toLowerCase().includes(query) ||
+          services.some(s => s.toLowerCase().includes(query)) ||
+          item.type.toLowerCase().includes(query) ||
+          item.year.toString().includes(query);
+
+        const matchesCategory = !category || item.category.toLowerCase() === category;
+        const matchesRating = !rating || item.rating.toLowerCase() === rating;
+        const matchesService =
+          !service || services.some(s => s.toLowerCase() === service);
+        const matchesType = !type || item.type.toLowerCase() === type;
+
+        return matchesQuery && matchesCategory && matchesRating && matchesService && matchesType;
+      });
+
+      renderResults(matches);
+    }
+
+    function showSuggestions(query) {
+      suggestionsDiv.innerHTML = "";
+      if (!query) {
+        suggestionsDiv.style.display = "none";
+        return;
+      }
+
+      const matches = media
+        .filter(item => item.title.toLowerCase().startsWith(query.toLowerCase()))
+        .slice(0, 8);
+
+      if (!matches.length) {
+        suggestionsDiv.style.display = "none";
+        return;
+      }
+
+      matches.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.textContent = `${item.title} (${item.year})`;
+        div.onclick = () => {
+          input.value = item.title;
+          suggestionsDiv.style.display = "none";
+          searchMedia();
+        };
+        suggestionsDiv.appendChild(div);
+      });
+
+      suggestionsDiv.style.display = "block";
+    }
+
+    input.addEventListener("input", () => {
+      showSuggestions(input.value);
+    });
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        suggestionsDiv.style.display = "none";
+        searchMedia();
+      }
+    });
+
+    searchBtn.addEventListener("click", searchMedia);
+
+    document.getElementById("filterCategory").addEventListener("change", searchMedia);
+    document.getElementById("filterRating").addEventListener("change", searchMedia);
+    document.getElementById("filterService").addEventListener("change", searchMedia);
+    document.getElementById("filterType").addEventListener("change", searchMedia);
+    sortSelect.addEventListener("change", () => {
+      searchMedia();
+      renderLiked();
+      renderTrending();
+      loadPopularNow();
+    });
+
+    // Initial load
+    loadPopularNow();
+    renderLiked();
+    renderTrending();
+  </script>
+</body>
+</html>
